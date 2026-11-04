@@ -1,0 +1,90 @@
+#!/bin/sh
+[ -n "${ZSH_VERSION:-}" ] && emulate sh
+
+for nz_inherited in $(env | sed -n 's/^\(NZ_[A-Za-z0-9_]*\)=.*/\1/p'); do
+  unset "${nz_inherited}"
+done
+
+nz_self="$0"
+case "${nz_self}" in
+*/*) ;;
+*) nz_self="$(command -v -- "${nz_self}")" ;;
+esac
+NZ_LIB="$(cd "${nz_self%/*}/../lib" && pwd)" || exit 1
+
+# shellcheck source=SCRIPTDIR/../lib/core.sh
+. "${NZ_LIB}/core.sh"
+# shellcheck source=SCRIPTDIR/../lib/ui.sh
+. "${NZ_LIB}/ui.sh"
+# shellcheck source=SCRIPTDIR/../lib/cli.sh
+. "${NZ_LIB}/cli.sh"
+# shellcheck source=SCRIPTDIR/../lib/doctor.sh
+. "${NZ_LIB}/doctor.sh"
+# shellcheck source=SCRIPTDIR/../lib/args.sh
+. "${NZ_LIB}/args.sh"
+# shellcheck source=SCRIPTDIR/../lib/engine.sh
+. "${NZ_LIB}/engine.sh"
+# shellcheck source=SCRIPTDIR/../lib/name.sh
+. "${NZ_LIB}/name.sh"
+# shellcheck source=SCRIPTDIR/../lib/rename.sh
+. "${NZ_LIB}/rename.sh"
+# shellcheck source=SCRIPTDIR/../lib/apply.sh
+. "${NZ_LIB}/apply.sh"
+
+nz_main() {
+  nz_mn_count=$#
+  nz_mn_literal=no
+  while [ "${nz_mn_count}" -gt 0 ]; do
+    nz_mn_arg="$1"
+    shift
+    nz_mn_count=$((nz_mn_count - 1))
+    case "${nz_mn_literal}:${nz_mn_arg}" in
+    no:--) nz_mn_literal=yes ;;
+    no:--theme=*)
+      NZ_THEME="${nz_mn_arg#--theme=}"
+      continue
+      ;;
+    no:--theme)
+      [ "${nz_mn_count}" -gt 0 ] || nz_main_stop "option '--theme' needs a value"
+      NZ_THEME="$1"
+      shift
+      nz_mn_count=$((nz_mn_count - 1))
+      continue
+      ;;
+    *) ;;
+    esac
+    set -- "$@" "${nz_mn_arg}"
+  done
+  nz_ui_setup || nz_main_fail "${NZ_UI_PROBLEM}"
+  nz_dispatch "$@"
+}
+
+nz_main_stop() {
+  nz_cli_hint "$1"
+  exit 1
+}
+
+nz_main_fail() {
+  nz_error "$1"
+  exit 1
+}
+
+nz_dispatch() {
+  if [ "$#" -eq 0 ]; then
+    nz_menu
+    return
+  fi
+  nz_dp_command="$1"
+  shift
+  case "${nz_dp_command}" in
+  help | -h | --help) nz_usage ;;
+  version | -V | --version) nz_cli_version ;;
+  doctor) nz_doctor ;;
+  name) nz_name "$@" ;;
+  rename) nz_rename "$@" ;;
+  -*) nz_main_stop "a command comes first, such as name or rename, got '${nz_dp_command}'" ;;
+  *) nz_main_stop "unknown command '${nz_dp_command}'" ;;
+  esac
+}
+
+nz_main "$@"

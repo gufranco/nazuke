@@ -1,0 +1,37 @@
+#compdef nazuke
+
+_nazuke() {
+  local -a commands common
+  commands=(
+    'name:print a short name for each text'
+    'rename:give every file of a folder a short unique name'
+    'doctor:check the tools nazuke needs'
+    'version:print the version'
+    'help:print usage'
+  )
+  common=(
+    '--max[longest name, 4 to 255]:length:'
+    '--words[word pack]:pack:(generic games)'
+    '--json[print the result as one JSON object]'
+    '--theme[colours of the terminal interface]:theme:(kodougu catppuccin-mocha catppuccin-latte dracula nord gruvbox tokyo-night mono)'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe command commands
+    return
+  fi
+
+  case "${words[2]}" in
+    rename)
+      _arguments "${common[@]}" \
+        '--ext[longest extension, 1 to 255]:length:' \
+        '--dry-run[list every rename and change nothing]' \
+        '*:folder:_files -/'
+      ;;
+    name)
+      _arguments "${common[@]}" '*:text:'
+      ;;
+  esac
+}
+
+_nazuke "$@"

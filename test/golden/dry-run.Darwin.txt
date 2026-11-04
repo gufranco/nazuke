@@ -1,0 +1,13 @@
+
+Folder: WORK/target
+Plan:   rename 5 files to a name of up to 8 characters
+        keep 1 file whose name is already short
+        dry run: list each rename and change nothing
+Words:  games
+
+Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).z64 -> ZELDAOOT.Z64
+Pokemon Snap (Europe).z64 -> POKSNAPE.Z64
+Pokemon Snap (USA).z64 -> POKSNAPU.Z64
+Super Mario 64 (USA).z64 -> MARIO64U.Z64
+notes.docx -> NOTES.DOC
+Dry run: 5 files would get a short name. Nothing was renamed.

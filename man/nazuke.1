@@ -1,0 +1,198 @@
+.TH NAZUKE 1 "2026-11-04" "nazuke" "User Commands"
+.SH NAME
+nazuke \- give long names short, readable, unique ones, 8.3 by default
+.SH SYNOPSIS
+.B nazuke
+.br
+.B nazuke name
+.RI [ options ] " " text ...
+.br
+.B nazuke rename
+.RI [ options ] " " [ folder ]
+.br
+.B nazuke doctor
+.br
+.B nazuke version
+.br
+.B nazuke help
+.SH DESCRIPTION
+.B nazuke
+turns a long name, such as a release name or a document title, into a short
+one that a person can still read: eight capital letters and digits by
+default, the base of an 8.3 file name. It keeps whole words where it can,
+keeps every digit, drops bracketed tags such as
+.IR (USA) ,
+articles and small words such as
+.I of
+and
+.IR the ,
+and shortens a subtitle to its initials. Accented and other Latin letters
+become plain ones, so
+.I Stra\(sse
+becomes
+.BR STRASSE .
+.PP
+Several forms of each name are scored, and the best is kept: whole words and
+the last word kept intact score high, truncated words and words cut to one
+letter score low, and dropping a word costs much more than dropping a generic
+one from the word pack.
+.SH COMMANDS
+.TP
+.BI name " text ..."
+Print the short name of each text, one per line, in order.
+.TP
+.BI rename " [folder]"
+Give every file at the top of the folder, the current one when none is given,
+a short name that no other entry of the folder holds in any case. A file whose
+name is already short, capitals and digits within
+.BR \-\-max ,
+keeps it, so a second run changes nothing. The extension after the last dot,
+one to eight letters and digits with at least one letter, is kept in
+capitals, so each name is a valid 8.3 name on FAT12 and FAT16, and shortened
+to
+.B \-\-ext
+characters, using
+.I jpg
+for
+.IR jpeg ,
+.I htm
+for
+.IR html ,
+.I unf
+for
+.I unif
+and a few others. No new name is a device name such as
+.B CON
+or
+.BR LPT1 .
+Two names that collide take the region letter of their tag, such as
+.B U
+for
+.IR (USA) ,
+when the word pack has one, and a number otherwise. Subfolders, hidden files
+and special files keep their names; symbolic links are renamed themselves.
+Each file is moved to a hidden temporary name first, then to its new name, so
+an interrupt puts back every name the run changed. Where gum draws, the plan
+is shown and confirmed before anything moves.
+.TP
+.B doctor
+List the tools nazuke needs, with the flavor and version of each. Exits
+non-zero only when one is missing.
+.TP
+.B version
+Print the version and the platform.
+.TP
+.B help
+Print the usage page.
+.PP
+With no command on a terminal, nazuke asks which job to do.
+.SH OPTIONS
+.TP
+.BI \-\-max " n"
+The longest name, 4 to 255. The default is 8.
+.TP
+.BI \-\-ext " n"
+For rename, the longest extension, 1 to 255. The default is 3.
+.TP
+.BI \-\-words " pack"
+.B generic
+for any name,
+.B games
+for release names, which also drops generic title words such as Legend and
+Super and reads region tags, or the path of a word pack of your own. The
+default is
+.BR generic .
+.TP
+.B \-\-dry\-run
+For rename, list every rename and change nothing.
+.TP
+.B \-\-json
+Print the result as one JSON object on stdout. For name: the settings and each
+text with its name. For rename: the folder, the settings, the counts of files
+found, renamed, kept and failed, and each rename.
+.TP
+.BI \-\-theme " name"
+Colours of the terminal interface:
+.BR kodougu ,
+.BR catppuccin\-mocha ,
+.BR catppuccin\-latte ,
+.BR dracula ,
+.BR nord ,
+.BR gruvbox ,
+.B tokyo\-night
+or
+.BR mono .
+The default is
+.BR kodougu .
+.PP
+.B \-\-
+ends the options, so a text or a folder may start with a dash.
+.SH WORD PACKS
+A word pack is a text file of lines, each a key followed by words in capitals:
+.TP
+.BI fallback " WORD"
+The name of a text with nothing to keep.
+.TP
+.BI stopwords " WORD ..."
+Small words that are dropped.
+.TP
+.BI articles " WORD ..."
+Articles dropped at the start, or moved from the end as in
+.IR "Legend of Zelda, The" .
+.TP
+.BI droppable " WORD ..."
+Generic words that are cheap to drop.
+.TP
+.BI region " WORD LETTER"
+A tag word and the letter that stands for it in a collision.
+.SH ENVIRONMENT
+.TP
+.B NAZUKE_MAX
+The longest name when
+.B \-\-max
+is not given.
+.TP
+.B NAZUKE_EXT
+The longest extension when
+.B \-\-ext
+is not given.
+.TP
+.B NAZUKE_WORDS
+The word pack when
+.B \-\-words
+is not given.
+.TP
+.B NAZUKE_THEME
+The theme when
+.B \-\-theme
+is not given.
+.TP
+.B KODOUGU_THEME
+The theme of every kodougu tool, when neither
+.B \-\-theme
+nor
+.B NAZUKE_THEME
+is set.
+.TP
+.B KODOUGU_ACCENT
+A colour such as #CBA6F7 that replaces the accent of the theme.
+.TP
+.B NO_COLOR
+Turns colour off in every theme.
+.SH EXIT STATUS
+0 on success, including a rename run with nothing to rename. 1 when a file
+could not be renamed, no short name was left for one, or the arguments are
+wrong. 130 after an interrupt.
+.SH EXAMPLES
+.TP
+.B nazuke name \(dqLegend of Zelda, The \- Ocarina of Time (USA)\(dq
+Print LEZELOOT, or ZELDAOOT with
+.BR "\-\-words games" .
+.TP
+.B nazuke rename \-\-words games \-\-dry\-run ~/roms
+Show the short names a folder of games would get.
+.TP
+.B nazuke rename \-\-max 12 \-\-ext 4 .
+Give the current folder names of up to twelve characters.
+.SH SEE ALSO
+.BR mv (1)
