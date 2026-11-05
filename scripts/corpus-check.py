@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -25,7 +27,7 @@ TEXT = {"encoding": "utf-8", "errors": "surrogateescape"}
 Rename = tuple[str, str, str]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Settings:
     pack: Path
     max_len: int
@@ -33,7 +35,7 @@ class Settings:
     fallback: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Folder:
     name: str
     renames: tuple[Rename, ...]
@@ -41,7 +43,7 @@ class Folder:
     problems: tuple[str, ...]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Totals:
     files: int
     renamed: int
