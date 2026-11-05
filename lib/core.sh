@@ -3,7 +3,7 @@
 # shellcheck source=SCRIPTDIR/state.sh
 . "${NZ_LIB:?}/state.sh"
 
-NAZUKE_VERSION="1.0.0"
+NAZUKE_VERSION="1.1.0"
 
 nz_version() {
   printf '%s %s\n' "${NZ_PROG}" "${NAZUKE_VERSION}"

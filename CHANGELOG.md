@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.1.0](https://github.com/gufranco/nazuke/compare/v1.0.0...v1.1.0) (2026-11-05)
+
+
+### Features
+
+* name shared heads, disc numbers and dates ([f524be4](https://github.com/gufranco/nazuke/commit/f524be44554cbc4866b5eccc375615c695d54976))
+
 # 1.0.0 (2026-11-04)
 
 
