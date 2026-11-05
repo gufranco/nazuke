@@ -72,6 +72,71 @@ names_differ() {
   [[ "${output}" == "FILE" ]]
 }
 
+@test "a disc number in a tag survives the tag removal" {
+  # Arrange
+  local -a texts=("Final Fantasy VII (USA) (Disc 1)" "Final Fantasy VII (USA) (Disc 2)")
+
+  # Act
+  run nz_test_run name --words games "${texts[@]}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${lines[0]}" == *1 ]]
+  [[ "${lines[1]}" == *2 ]]
+  [[ "${lines[0]%1}" == "${lines[1]%2}" ]]
+}
+
+@test "a disk, side, tape or part number in a tag survives as well" {
+  # Arrange
+  local -a texts=("Harry & Harry (1986)(Disk 2 of 2)" "Tape Game [Tape 3]" "Song (Side B)" "Story (Part 4)")
+
+  # Act
+  run nz_test_run name "${texts[@]}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${lines[0]}" == *2 ]]
+  [[ "${lines[1]}" == *3 ]]
+  [[ "${lines[2]}" == *B ]]
+  [[ "${lines[3]}" == *4 ]]
+}
+
+@test "a title too long only for a long digit run drops that run" {
+  # Arrange
+  local text="Pyramid_9820_Brochure_198611"
+
+  # Act
+  run nz_test_run name "${text}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" =~ ^PYR[A-Z]*9820[A-Z]+$ ]]
+}
+
+@test "a title too long for its short digit runs is named from its words" {
+  # Arrange
+  local text="IMG 2024 03 11 Beach Sunset"
+
+  # Act
+  run nz_test_run name "${text}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" =~ ^IMG[A-Z]+$ ]]
+}
+
+@test "a title of digits only keeps its leading digits" {
+  # Arrange
+  local text="92067-18534_2040"
+
+  # Act
+  run nz_test_run name "${text}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" == "92067185" ]]
+}
+
 @test "letters outside A to Z become their plain form" {
   # Arrange
   local text

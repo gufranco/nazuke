@@ -168,12 +168,23 @@ function drop_possessive(s,   out, i, n, c, after) {
   return out
 }
 
-function clean(raw,   s, inner, i) {
+function part_number(inner,   upper) {
+  upper = toupper(inner)
+  if (upper !~ /^ *(DISC|DISK|CD|SIDE|TAPE|PART) ?([0-9]+|[A-Z])( OF [0-9]+)? *$/) { return "" }
+  sub(/^ *(DISC|DISK|CD|SIDE|TAPE|PART) ?/, "", upper)
+  sub(/ OF [0-9]+ *$/, "", upper)
+  sub(/ +$/, "", upper)
+  return upper
+}
+
+function clean(raw,   s, inner, i, part) {
   s = plain_text(raw)
   clean_tags = ""
+  part = ""
   while (match(s, /[[(][^])]*[])]/)) {
     inner = substr(s, RSTART + 1, RLENGTH - 2)
     clean_tags = clean_tags " " inner
+    if (part == "") { part = part_number(inner) }
     s = substr(s, 1, RSTART - 1) " " substr(s, RSTART + RLENGTH)
   }
   s = strip_edges(s)
@@ -183,6 +194,7 @@ function clean(raw,   s, inner, i) {
   }
   s = drop_leading_article(s)
   s = drop_possessive(s)
+  if (part != "") { s = s " " part }
   gsub(/ +/, " ", s)
   return trim(s)
 }

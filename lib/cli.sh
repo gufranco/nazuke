@@ -41,13 +41,18 @@ environment:
 
 notes:
   A name keeps its words whole where it can, keeps its digits, and drops
-  bracketed tags, articles and small words such as of and the. Accented and
-  other Latin letters become plain ones. The games pack also drops generic
-  title words such as Legend and Super, and turns a region tag such as (USA)
-  into one letter when two names collide; any other collision gets a number.
+  bracketed tags, articles and small words such as of and the. A disc, disk,
+  CD, side, tape or part number in a tag stays. When the digits leave no
+  room, a run of five or more digits goes first, then every digit; a name
+  of digits only keeps its first ones. Accented and other Latin letters
+  become plain ones. The games pack also drops generic title words such as
+  Legend and Super, and turns a region tag such as (USA) into one letter
+  when two names collide; any other collision gets a number.
 
-  rename looks at the top of the folder only. A file whose name is already
-  short, in capitals and digits, keeps it, so a second run changes nothing.
+  rename looks at the top of the folder only. When three or more files share
+  the part before " - ", that part is dropped from each of their names. A file
+  whose name is already short, in capitals and digits, keeps it, so a second
+  run changes nothing.
   The extension after the last dot is kept in capitals, shortened to --ext
   characters, so each name is a valid 8.3 name on FAT12 and FAT16. No new
   name repeats another entry of the folder in any case or names a device

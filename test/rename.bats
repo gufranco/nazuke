@@ -393,7 +393,7 @@ listing() {
   [[ "$(listing || true)" == "${expected}" ]]
 }
 
-@test "a name that no counter can free is reported" {
+@test "the counter goes past 999 while the name has room" {
   # Arrange
   local index=1
   : >"${TARGET}/REPORT.TXT"
@@ -411,9 +411,78 @@ listing() {
   run nz_test_run rename "${TARGET}"
 
   # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ -f "${TARGET}/REPO1000.TXT" ]]
+  [[ ! -e "${TARGET}/Report (final).txt" ]]
+}
+
+@test "a name that no counter can free is reported" {
+  # Arrange
+  local index=1
+  : >"${TARGET}/REPO.TXT"
+  : >"${TARGET}/REP.TXT"
+  while [[ "${index}" -le 999 ]]; do
+    if [[ "${index}" -lt 10 ]]; then
+      : >"${TARGET}/REP${index}.TXT"
+    elif [[ "${index}" -lt 100 ]]; then
+      : >"${TARGET}/RE${index}.TXT"
+    else
+      : >"${TARGET}/R${index}.TXT"
+    fi
+    index=$((index + 1))
+  done
+  nz_test_files "${TARGET}" "Report (final).txt"
+
+  # Act
+  run nz_test_run rename --max 4 "${TARGET}"
+
+  # Assert
   [[ "${status}" -eq 1 ]]
   [[ "${output}" == *"nazuke: no short name is left for Report (final).txt, so it keeps its name."* ]]
   [[ -f "${TARGET}/Report (final).txt" ]]
+}
+
+@test "discs of one game get their own numbers instead of a counter" {
+  # Arrange
+  nz_test_files "${TARGET}" "Final Fantasy VII (USA) (Disc 1).cue" "Final Fantasy VII (USA) (Disc 2).cue"
+  local first second
+
+  # Act
+  run nz_test_run rename --words games "${TARGET}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  first="$(cd "${TARGET}" && ls -- *1.CUE)"
+  second="$(cd "${TARGET}" && ls -- *2.CUE)"
+  [[ "${first%1.CUE}" == "${second%2.CUE}" ]]
+}
+
+@test "a head shared by three or more files of the folder is dropped" {
+  # Arrange
+  nz_test_files "${TARGET}" "HBMAME (v0.209) - mslughp08.zip" "HBMAME (v0.209) - mslughp02.zip" "HBMAME (v0.245) - kof96ryu.zip"
+  local expected
+  expected="$(printf '%s\n' ./KOF96RYU.ZIP ./MSLUGH02.ZIP ./MSLUGH08.ZIP)"
+
+  # Act
+  run nz_test_run rename "${TARGET}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "$(listing || true)" == "${expected}" ]]
+}
+
+@test "a head shared by only two files of the folder is kept" {
+  # Arrange
+  nz_test_files "${TARGET}" "Mario Kart - Double Dash.txt" "Mario Kart - Super Circuit.txt"
+  local expected
+  expected="$(printf '%s\n' ./MARKARDD.TXT ./MARKARSC.TXT)"
+
+  # Act
+  run nz_test_run rename "${TARGET}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "$(listing || true)" == "${expected}" ]]
 }
 
 @test "--json prints the counts and every rename" {

@@ -116,17 +116,19 @@ On a terminal with `gum` installed, nazuke draws its menu, prompts, plan and res
 
 nazuke cleans the name, builds several short forms of it and keeps the one that reads best.
 
-- **Cleaning.** Bracketed tags such as `(USA)` and `[!]` go, a trailing article moves out of the way, as in `Legend of Zelda, The`, and possessives lose their `'s`. Accented and other Latin letters become plain ones: `Café` is `CAFE`, `Straße` is `STRASSE`, `Łódź` is `LODZ`. Small words such as `of` and `the` are dropped.
+- **Cleaning.** Bracketed tags such as `(USA)` and `[!]` go, except the number of a disc, disk, CD, side, tape or part, so `(Disc 2)` keeps its `2`. A trailing article moves out of the way, as in `Legend of Zelda, The`, and possessives lose their `'s`. Accented and other Latin letters become plain ones: `Café` is `CAFE`, `Straße` is `STRASSE`, `Łódź` is `LODZ`. Small words such as `of` and `the` are dropped.
 - **Forms.** The words whole, the words shrunk evenly, the first word with the initials of the rest, and the initials alone; a subtitle after ` - ` or `: ` becomes its initials.
 - **Score.** Whole words and an intact last word score high; truncated words and words cut to a single letter score low; a form that keeps every digit scores higher. Dropping a word costs ten times more than dropping one the word pack calls generic, which is why `Conker's Bad Fur Day` becomes `CBFD` while the games pack lets `Legend of Zelda` lose `Legend`.
+- **Digits that leave no room.** Digits are never cut, so a long date or part number can fill the name. Then a run of five or more digits goes first, as in `Pyramid_9820_Brochure_198611`, which becomes `PYR9820B`, and every digit after that, so `IMG 2024 03 11 Beach Sunset` becomes `IMGBS`. A name of digits only keeps its first ones.
 
-The engine reproduces the naming of [n64-mr-backup-z64-python](https://github.com/gufranco/n64-mr-backup-z64-python), tuned on 1,414 real release names, and the tests check it against that code's own output for 391 names.
+The engine reproduces the naming of [n64-mr-backup-z64-python](https://github.com/gufranco/n64-mr-backup-z64-python), tuned on 1,414 real release names, and the tests check it against that code's own output for 391 names. Two of them differ on purpose: where that code gives up and prints its fallback word because the digits leave no room, nazuke names them from their words.
 
 ### Renaming a folder
 
 - A file whose name is already short, in capitals and digits, keeps it, so running nazuke again changes nothing and a new file never renames an old one.
 - No new name repeats another entry of the folder, files, folders and hidden files alike, in any case, and none is a device name such as `CON` or `LPT1`.
-- When two names collide, the games pack adds the region letter of their tag, so the three `Pokemon Snap` releases become `POKSNAPU`, `POKSNAPE` and `POKSNAPJ`. Any other collision gets a number: `REPORT`, `REPORT1`.
+- When three or more files share the part of their name before ` - `, that part is dropped from each, so a folder of `HBMAME (v0.209) - mslughp08.zip` and its siblings is named after the set names, `MSLUGH08`, instead of `HBMAME` and a counter.
+- When two names collide, the games pack adds the region letter of their tag, so the three `Pokemon Snap` releases become `POKSNAPU`, `POKSNAPE` and `POKSNAPJ`. Any other collision gets a number, `REPORT`, `REPORT1`, which grows past 999 for as long as it fits in the name.
 - The extension is kept, written in capitals and shortened to `--ext` characters, with the usual short forms for `jpeg`, `tiff`, `html`, `mpeg`, `aiff`, `markdown` and the NES `unif`. A whole name in capitals and digits is a valid 8.3 name, so a FAT12 or FAT16 device reads it without long file names. Text after the last dot is an extension only when it is one to eight letters and digits with a letter among them, so `Rally 2.0` keeps its version.
 - Subfolders, hidden files and special files keep their names. A symbolic link is renamed itself, never its target.
 - Each file moves to a hidden temporary name, then to its new name, so a rename that only changes case works on a disk that ignores case, and an interrupt puts back every name the run changed.

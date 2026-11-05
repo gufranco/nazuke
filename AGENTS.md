@@ -33,7 +33,7 @@ Guidance for anyone, human or agent, changing nazuke. What nazuke is and how to 
 ## Domain rules
 
 - The naming engine reproduces `src/z64kit/naming.py` of gufranco/n64-mr-backup-z64-python at 6675f5a. `test/names/*.tsv` holds that reference's output for 391 names, with `DROPPABLE` emptied and the fallback `FILE` for the generic pack. A change to the engine keeps both corpora passing, or replaces a row only with a reason in the commit body.
-- One deliberate difference: a collision without a region tag gets a number, never naming.py's `X`.
+- Deliberate differences from naming.py: a collision without a region tag gets a number, never naming.py's `X`; a disc, disk, CD, side, tape or part number inside a tag stays in the title; when no form fits, a run of five or more digits is dropped, then every digit, before the fallback word, and a title of digits only keeps its first digits; in `rename`, a head before ` - ` shared by three or more files of the folder is dropped from each, in up to two passes; the counter runs while the suffix fits, not to 999. The two corpus rows these change, `IMG 2024 03 11 Beach Sunset` and `Screenshot 2026-11-04 at 10.33.49`, hold nazuke's own names.
 - The engine runs under `LC_ALL=C`, so every awk compares and measures bytes alike.
 - A file is never renamed over another entry, in any case, and no name is a device name. Every change to the rename path keeps the tests that prove it.
 - A rename moves the file to `.nazuke-<n>` first and to its name second, so a case-only rename works on a case-insensitive disk and an interrupt can put every name back.

@@ -26,8 +26,12 @@ articles and small words such as
 .I of
 and
 .IR the ,
-and shortens a subtitle to its initials. Accented and other Latin letters
-become plain ones, so
+and shortens a subtitle to its initials. A disc, disk, CD, side, tape or part
+number inside a tag, such as
+.IR "(Disc 2)" ,
+stays. When the digits alone leave no room, a run of five or more digits is
+dropped first and then every digit; a name of digits only keeps its first
+ones. Accented and other Latin letters become plain ones, so
 .I Stra\(sse
 becomes
 .BR STRASSE .
@@ -69,7 +73,11 @@ Two names that collide take the region letter of their tag, such as
 .B U
 for
 .IR (USA) ,
-when the word pack has one, and a number otherwise. Subfolders, hidden files
+when the word pack has one, and a number otherwise, as long as the number
+fits. When three or more files share the part of their name before
+.BR " - " ,
+that part is dropped from each of them, so the names come from what tells the
+files apart. Subfolders, hidden files
 and special files keep their names; symbolic links are renamed themselves.
 Each file is moved to a hidden temporary name first, then to its new name, so
 an interrupt puts back every name the run changed. Where gum draws, the plan

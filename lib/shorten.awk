@@ -205,7 +205,33 @@ function with_tail(main, nm, tail, nt, maxlen,   drop, alphas, i, seen, base, nb
   }
 }
 
-function shorten(title, maxlen,   all, nall, main, nm, sub_tokens, ns, tail, i, initials) {
+function without(title, pattern,   s) {
+  s = title
+  gsub(pattern, " ", s)
+  return s
+}
+
+function digits_of(title,   s) {
+  s = title
+  gsub(/[^0-9]/, "", s)
+  return s
+}
+
+function shorten(title, maxlen,   name, trimmed) {
+  name = shorten_once(title, maxlen)
+  if (name != "") { return name }
+  trimmed = without(title, "[0-9][0-9][0-9][0-9][0-9]+")
+  if (trimmed != title) { name = shorten_once(trimmed, maxlen) }
+  if (name != "") { return name }
+  trimmed = without(title, "[0-9]+")
+  if (trimmed != title) { name = shorten_once(trimmed, maxlen) }
+  if (name != "") { return name }
+  name = digits_of(title)
+  if (name != "") { return substr(name, 1, maxlen) }
+  return substr(fallback, 1, maxlen)
+}
+
+function shorten_once(title, maxlen,   all, nall, main, nm, sub_tokens, ns, tail, i, initials) {
   offered = 0
   split_subtitle(title)
   nall = tokenize(sub_head, all)
@@ -228,7 +254,7 @@ function shorten(title, maxlen,   all, nall, main, nm, sub_tokens, ns, tail, i, 
   }
   i = best_offer()
   if (i) { return offer_name[i] }
-  return substr(fallback, 1, maxlen)
+  return ""
 }
 
 function name_line(   tab) {
@@ -258,7 +284,7 @@ function settle(key,   short, letter, candidate, counter, suffix) {
     remember(key, candidate)
     return
   }
-  for (counter = 1; counter < 1000; counter++) {
+  for (counter = 1; counter <= counter_limit && length(letter counter) < max; counter++) {
     suffix = letter counter
     candidate = substr(substr(short, 1, max - length(suffix)) suffix, 1, max)
     if (free_name(candidate, ext_of[key])) {
@@ -292,10 +318,29 @@ function assign_line(   field) {
   }
   order[++nkeys] = field[1]
   ext_of[field[1]] = short_extension(field[4])
+  stem_of[field[1]] = field[3]
   title_of[field[1]] = clean(field[3])
   region_of[field[1]] = region_letter(clean_tags)
   base_of[field[1]] = shorten(title_of[field[1]], max)
   owner[field[1]] = (toupper(field[3]) == base_of[field[1]])
+}
+
+function drop_shared_heads(   i, key, head_of, tail_of, count) {
+  for (i = 1; i <= nkeys; i++) {
+    key = order[i]
+    split_subtitle(title_of[key])
+    if (sub_tail == "") { continue }
+    head_of[key] = toupper(sub_head)
+    tail_of[key] = sub_tail
+    count[head_of[key]]++
+  }
+  for (i = 1; i <= nkeys; i++) {
+    key = order[i]
+    if (!(key in head_of) || count[head_of[key]] < shared_head_min) { continue }
+    title_of[key] = tail_of[key]
+    base_of[key] = shorten(title_of[key], max)
+    owner[key] = (toupper(stem_of[key]) == base_of[key])
+  }
 }
 
 function sort_list(list, n, numeric,   i, j, value) {
@@ -348,6 +393,9 @@ function assign_all(   i, key, group, count, groups, ngroups, settled) {
 }
 
 BEGIN {
+  counter_limit = 9999999
+  shared_head_min = 3
+  shared_head_passes = 2
   load_bytes()
   load_reserved()
   load_pack(pack)
@@ -359,6 +407,11 @@ BEGIN {
 mode == "name" { name_line() }
 mode == "assign" { assign_line() }
 
+function assign_folder(   pass) {
+  for (pass = 1; pass <= shared_head_passes; pass++) { drop_shared_heads() }
+  assign_all()
+}
+
 END {
-  if (mode == "assign") { assign_all() }
+  if (mode == "assign") { assign_folder() }
 }
