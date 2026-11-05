@@ -2,7 +2,7 @@ SHELL := /bin/sh
 PREFIX ?= $(HOME)/.local
 SCRIPTS := bin/nazuke lib/*.sh scripts/*.sh .github/scripts/*.sh test/*.sh test/*.bash test/*.bats test/bin/gum screens/*.sh
 
-.PHONY: help fmt lint test test-all test-linux coverage check screens install
+.PHONY: help fmt lint test test-all test-linux coverage corpus check screens install
 
 help:
 	@echo "targets:"
@@ -12,6 +12,7 @@ help:
 	@echo "  test-all    bats suites under every installed shell"
 	@echo "  test-linux  the same suites in an Ubuntu container"
 	@echo "  coverage    bashcov on this Mac and in the Ubuntu container, merged, gate 100%"
+	@echo "  corpus      rename every folder of NAZUKE_CORPUS, a file of paths, and check the names"
 	@echo "  check       lint and test"
 	@echo "  screens     record the README screens from the real tool with VHS, on macOS"
 	@echo "  install     install the tool, man page and completions under PREFIX (default ~/.local)"
@@ -40,6 +41,9 @@ coverage:
 	sh scripts/coverage.sh 0 && cp -f coverage/.resultset.json coverage-macos.json
 	sh test/linux-container.sh sh scripts/linux-coverage.sh
 	python3 scripts/coverage-gate.py '/(bin/nazuke|lib/[a-z]+\.sh)\Z' 100 coverage-macos.json coverage-linux.json
+
+corpus:
+	python3 scripts/corpus-check.py --words "$${NAZUKE_CORPUS_WORDS:-games}" $${NAZUKE_CORPUS_RECORD:+--record} "$${NAZUKE_CORPUS:?set NAZUKE_CORPUS to a file of paths, one per line}"
 
 screens:
 	sh screens/record.sh

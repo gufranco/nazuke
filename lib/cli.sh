@@ -50,9 +50,9 @@ notes:
   when two names collide; any other collision gets a number.
 
   rename looks at the top of the folder only. When three or more files share
-  the part before " - ", that part is dropped from each of their names. A file
-  whose name is already short, in capitals and digits, keeps it, so a second
-  run changes nothing.
+  the part before " - " and dropping it tells more of them apart, that part
+  is dropped from each of their names. A file whose name is already short, in
+  capitals and digits, keeps it, so a second run changes nothing.
   The extension after the last dot is kept in capitals, shortened to --ext
   characters, so each name is a valid 8.3 name on FAT12 and FAT16. No new
   name repeats another entry of the folder in any case or names a device

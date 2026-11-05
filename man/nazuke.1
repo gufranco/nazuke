@@ -75,9 +75,10 @@ for
 .IR (USA) ,
 when the word pack has one, and a number otherwise, as long as the number
 fits. When three or more files share the part of their name before
-.BR " - " ,
-that part is dropped from each of them, so the names come from what tells the
-files apart. Subfolders, hidden files
+.B " - "
+and dropping it tells more of them apart, that part is dropped from each of
+them, so the names come from what tells the files apart; variants of one title
+keep it. Subfolders, hidden files
 and special files keep their names; symbolic links are renamed themselves.
 Each file is moved to a hidden temporary name first, then to its new name, so
 an interrupt puts back every name the run changed. Where gum draws, the plan

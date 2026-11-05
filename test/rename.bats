@@ -471,6 +471,23 @@ listing() {
   [[ "$(listing || true)" == "${expected}" ]]
 }
 
+@test "a shared head is kept when dropping it tells no file apart" {
+  # Arrange
+  nz_test_files "${TARGET}" "Legend of Zelda, The - Ocarina of Time (USA).zip" \
+    "Legend of Zelda, The - Ocarina of Time (USA) (Beta).zip" \
+    "Legend of Zelda, The - Ocarina of Time (USA) (GameCube).zip"
+  local name
+
+  # Act
+  run nz_test_run rename --words games "${TARGET}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  for name in "${TARGET}"/*; do
+    [[ "${name##*/}" == ZELD* ]]
+  done
+}
+
 @test "a head shared by only two files of the folder is kept" {
   # Arrange
   nz_test_files "${TARGET}" "Mario Kart - Double Dash.txt" "Mario Kart - Super Circuit.txt"

@@ -325,21 +325,47 @@ function assign_line(   field) {
   owner[field[1]] = (toupper(field[3]) == base_of[field[1]])
 }
 
-function drop_shared_heads(   i, key, head_of, tail_of, count) {
+function group_heads(   i, key, head) {
+  split("", head_count)
+  split("", head_member)
+  split("", head_tail)
   for (i = 1; i <= nkeys; i++) {
     key = order[i]
     split_subtitle(title_of[key])
     if (sub_tail == "") { continue }
-    head_of[key] = toupper(sub_head)
-    tail_of[key] = sub_tail
-    count[head_of[key]]++
+    head = toupper(sub_head)
+    head_tail[key] = sub_tail
+    head_member[head, ++head_count[head]] = key
   }
-  for (i = 1; i <= nkeys; i++) {
-    key = order[i]
-    if (!(key in head_of) || count[head_of[key]] < shared_head_min) { continue }
-    title_of[key] = tail_of[key]
+}
+
+function distinct_names(head, headless,   j, key, name, seen, n) {
+  n = 0
+  for (j = 1; j <= head_count[head]; j++) {
+    key = head_member[head, j]
+    name = headless ? full_name(shorten(head_tail[key], max), ext_of[key]) : full_name(base_of[key], ext_of[key])
+    if (!(name in seen)) {
+      seen[name] = 1
+      n++
+    }
+  }
+  return n
+}
+
+function drop_head(head,   j, key) {
+  for (j = 1; j <= head_count[head]; j++) {
+    key = head_member[head, j]
+    title_of[key] = head_tail[key]
     base_of[key] = shorten(title_of[key], max)
     owner[key] = (toupper(stem_of[key]) == base_of[key])
+  }
+}
+
+function drop_shared_heads(   head) {
+  group_heads()
+  for (head in head_count) {
+    if (head_count[head] < shared_head_min) { continue }
+    if (distinct_names(head, 1) > distinct_names(head, 0)) { drop_head(head) }
   }
 }
 
